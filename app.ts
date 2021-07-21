@@ -67,6 +67,7 @@ class App {
     this.server = serve({
       port,
     })
+    // 回调
     callback && callback()
     for await (const req of this.server) {
       (async () => {
