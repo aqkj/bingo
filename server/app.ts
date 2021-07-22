@@ -3,32 +3,45 @@
  * app逻辑
  */
 import { serve, Server, ServerRequest } from 'https://deno.land/std@0.102.0/http/server.ts'
-
-// deno-lint-ignore no-namespace
-namespace Bingo {
-  export interface IAppOptions {
-    port: number
-  }
-  export interface IMiddleWare{
-    (ctx: IContext, next: CallableFunction): Promise<unknown> | unknown
-  }
-  export type IContext = ServerRequest
+import { BingoContext } from './context.ts'
+import { BingoRequest } from './request.ts'
+import { BingoResponse } from './response.ts'
+/**
+ * 中间件接口
+ */
+interface BingoMiddleWare{
+  (ctx: BingoContext, next: () => Promise<void>): Promise<unknown> | unknown
 }
-class App {
-  /** 配置 */
-  private options?: Bingo.IAppOptions
+/**
+ * Bingo类
+ */
+export class BingoApp {
+  context!: BingoContext
+  request!: BingoRequest
+  response!: BingoResponse
   /** 服务 */
   private server?: Server
   /** 存储中间件 */
-  private middlewares: Bingo.IMiddleWare[] = []
-  constructor(options?: Bingo.IAppOptions) {
-    this.options = options
+  private middlewares: BingoMiddleWare[] = []
+  /**
+   * 初始化context
+   * @param req 请求对象
+   * @returns 
+   */
+  private initContext(req: ServerRequest): BingoContext {
+    // 实例化context
+    const ctx = new BingoContext(req)
+    this.response = ctx.response
+    this.request = ctx.request
+    this.context = ctx
+    ctx.app = this
+    return ctx
   }
   /**
    * 触发中间件
    * @param ctx 上下文对象
    */
-  private async callMiddlewares(ctx: Bingo.IContext) {
+  private async callMiddlewares(ctx: BingoContext) {
     // 存储位置
     let nextCount = 0
     const fn = async (index: number) => {
@@ -50,9 +63,9 @@ class App {
   }
   /**
    * 挂载插件
-   * @param {Bingo.IMiddleWare} middleware 中间件方法
+   * @param {BingoMiddleWare} middleware 中间件方法
    */
-  use(middleware: Bingo.IMiddleWare) {
+  use(middleware: BingoMiddleWare) {
     // 插入中间件
     this.middlewares.push(middleware)
     return this
@@ -71,10 +84,22 @@ class App {
     callback && callback()
     for await (const req of this.server) {
       (async () => {
-        await this.callMiddlewares(req)
+        const ctx = this.initContext(req)
+        await this.callMiddlewares(ctx)
+        await this.respond(req)
       })()
     }
   }
+  /**
+   * 响应
+   */
+  respond(req: ServerRequest) {
+    req.respond({
+      status: 200,
+      headers: new Headers({
+        'content-Type': 'application/json;charset=utf-8'
+      }),
+      body: this.response.body
+    })
+  }
 }
-
-export default App
