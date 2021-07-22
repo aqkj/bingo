@@ -14,4 +14,10 @@ export class BingoContext {
     this.request = new BingoRequest(req)
     this.response = new BingoResponse()
   }
+  get body() {
+    return this.response.body
+  }
+  set body(val) {
+    this.response.body = val
+  }
 }
