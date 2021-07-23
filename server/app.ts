@@ -95,11 +95,10 @@ export class BingoApp {
    */
   respond(req: ServerRequest) {
     req.respond({
-      status: 200,
-      headers: new Headers({
-        'content-Type': 'application/json;charset=utf-8'
-      }),
-      body: this.response.body
+      status: this.response.status,
+      headers: this.response.headers,
+      body: this.response.body,
+      statusText: this.response.message
     })
   }
 }
