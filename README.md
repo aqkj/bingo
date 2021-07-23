@@ -5,7 +5,7 @@
 ## Hello Bingo
 
 ```js
-import Bingo from 'https://deno.land/x/bingo@0.0.2/server.ts'
+import Bingo from 'https://deno.land/x/bingo@0.1.0/server.ts'
 const app = new Bingo();
 
 // response
