@@ -16,9 +16,9 @@ interface BingoMiddleWare{
  * Bingo类
  */
 export class BingoApp {
-  context!: BingoContext
-  request!: BingoRequest
-  response!: BingoResponse
+  private context!: BingoContext
+  private request!: BingoRequest
+  private response!: BingoResponse
   /** 服务 */
   private server?: Server
   /** 存储中间件 */
@@ -93,7 +93,7 @@ export class BingoApp {
   /**
    * 响应
    */
-  respond(req: ServerRequest) {
+  private respond(req: ServerRequest) {
     req.respond({
       status: this.response.status,
       headers: this.response.headers,
