@@ -1,12 +1,7 @@
 /**
- * 路由
+ * 路由入口
  */
-
-class Router {
-  constructor() {
-
-  }
-}
+import { Router } from './router/index.ts'
 
 
 export default Router

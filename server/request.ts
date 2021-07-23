@@ -6,8 +6,8 @@ import { ServerRequest } from 'https://deno.land/std@0.102.0/http/server.ts'
 import { parseUrl, qs } from './url.ts'
 export class BingoRequest {
   URL: URL
-  constructor(private req: ServerRequest) {
-    this.URL = parseUrl(this.get('referrer') || this.get('referer') || `http://${this.href}`)
+  constructor(public req: ServerRequest) {
+    this.URL = parseUrl(this.get('referrer') || this.get('referer') || this.href)
   }
   get url() {
     return this.req.url
@@ -28,10 +28,10 @@ export class BingoRequest {
     this.req.headers = val
   }
   get method() {
-    return this.req.method
+    return this.req.method.toLowerCase()
   }
   set method(val) {
-    this.req.method = val
+    this.req.method = val.toLowerCase()
   }
   get host() {
     return this.get('host') as string

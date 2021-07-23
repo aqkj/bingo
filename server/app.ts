@@ -6,16 +6,18 @@ import { serve, Server, ServerRequest } from 'https://deno.land/std@0.102.0/http
 import { BingoContext } from './context.ts'
 import { BingoRequest } from './request.ts'
 import { BingoResponse } from './response.ts'
+import { callMiddlewares } from '../utils.ts'
+import { Event } from '../event.ts'
 /**
  * 中间件接口
  */
-interface BingoMiddleWare{
+export interface BingoMiddleWare{
   (ctx: BingoContext, next: () => Promise<void>): Promise<unknown> | unknown
 }
 /**
  * Bingo类
  */
-export class BingoApp {
+export class BingoApp extends Event {
   private context!: BingoContext
   private request!: BingoRequest
   private response!: BingoResponse
@@ -38,30 +40,6 @@ export class BingoApp {
     return ctx
   }
   /**
-   * 触发中间件
-   * @param ctx 上下文对象
-   */
-  private async callMiddlewares(ctx: BingoContext) {
-    // 存储位置
-    let nextCount = 0
-    const fn = async (index: number) => {
-      // 当前中间件方法
-      const middleware = this.middlewares[index]
-      // 增加
-      nextCount += 1
-      // 下一个中间件
-      const nextMiddleware = fn.bind(null, nextCount)
-      // 存在则执行
-      if (middleware) {
-        await middleware.call(null, ctx, nextMiddleware)
-          // 如果上一个执行完
-        if (nextCount === index + 1) await nextMiddleware()
-      }
-    }
-    // 调用
-    await fn(nextCount)
-  }
-  /**
    * 挂载插件
    * @param {BingoMiddleWare} middleware 中间件方法
    */
@@ -80,15 +58,38 @@ export class BingoApp {
     this.server = serve({
       port,
     })
+    // 监听错误事件
+    this.on('error', (error: unknown) => {
+      this.handlerError(error)
+    })
     // 回调
     callback && callback()
+    // 遍历
     for await (const req of this.server) {
       (async () => {
-        const ctx = this.initContext(req)
-        await this.callMiddlewares(ctx)
+        try {
+          // 初始化context
+          const ctx = this.initContext(req)
+          // 调用中间件
+          await callMiddlewares(ctx, this.middlewares)
+        } catch (error) {
+          // 发送错误事件
+          this.emit('error', error)
+        }
+        // 处理结果
         await this.respond(req)
       })()
     }
+  }
+  /**
+   * 处理错误
+   * @param req 
+   */
+  private handlerError(error: unknown) {
+    console.error(error)
+    this.context.status = 500
+    this.context.message = 'Internal server error'
+    this.context.body = '500 Internal server error'
   }
   /**
    * 响应
