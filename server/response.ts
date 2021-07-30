@@ -2,7 +2,7 @@
 
 
 export class BingoResponse {
-  body = ''
+  body: string | Record<string, unknown> = ''
   headers = new Headers({
     'content-type': 'text/plain;charset=utf-8'
   })

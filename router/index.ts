@@ -53,6 +53,42 @@ export class Router {
     return this.route(path, 'get', ...middlewares)
   }
   /**
+   * post注册路由
+   * @param path 路径
+   * @param middlewares 中间件
+   * @returns 
+   */
+  post(path: string, ...middlewares: BingoMiddleWare[]) {
+    return this.route(path, 'post', ...middlewares)
+  }
+  /**
+   * put注册路由
+   * @param path 路径
+   * @param middlewares 中间件
+   * @returns 
+   */
+  put(path: string, ...middlewares: BingoMiddleWare[]) {
+    return this.route(path, 'put', ...middlewares)
+  }
+  /**
+   * put注册路由
+   * @param path 路径
+   * @param middlewares 中间件
+   * @returns 
+   */
+  delete(path: string, ...middlewares: BingoMiddleWare[]) {
+    return this.route(path, 'delete', ...middlewares)
+  }
+  /**
+   * put注册路由
+   * @param path 路径
+   * @param middlewares 中间件
+   * @returns 
+   */
+  patch(path: string, ...middlewares: BingoMiddleWare[]) {
+    return this.route(path, 'patch', ...middlewares)
+  }
+  /**
    * 匹配路由
    * @param {BingoContext} ctx 上下文
    */
@@ -102,17 +138,18 @@ export class Router {
       const currRoute = this.matchRoutes(ctx)
       // 匹配成功
       if (currRoute) {
-        try {
-          // 遍历中间件
-          await callMiddlewares(ctx, [...currRoute.middlewares, next])
-        } catch (error) {
-          // 发送错误事件
-          ctx.app.emit('error', error)
-        }
+        // try {
+        // 遍历中间件
+        await callMiddlewares(ctx, [...currRoute.middlewares, next])
+        // } catch (error) {
+        //   // 发送错误事件
+        //   ctx.app.emit('error', error)
+        // }
       } else {
         ctx.status = 404
         ctx.message = 'NotFound'
         ctx.body = '404 NotFound'
+        await next()
       }
     }
   }

@@ -8,6 +8,7 @@ import { BingoRequest } from './request.ts'
 import { BingoResponse } from './response.ts'
 import { callMiddlewares } from '../utils.ts'
 import { Event } from '../event.ts'
+import { HttpError } from '../error.ts'
 /**
  * 中间件接口
  */
@@ -59,7 +60,7 @@ export class BingoApp extends Event {
       port,
     })
     // 监听错误事件
-    this.on('error', (error: unknown) => {
+    this.on('error', (error: Error) => {
       this.handlerError(error)
     })
     // 回调
@@ -85,20 +86,24 @@ export class BingoApp extends Event {
    * 处理错误
    * @param req 
    */
-  private handlerError(error: unknown) {
+  private handlerError(error: Error) {
     console.error(error)
-    this.context.status = 500
-    this.context.message = 'Internal server error'
-    this.context.body = '500 Internal server error'
+    if (!(error instanceof HttpError)) error = new HttpError(500)
+    // @ts-ignore
+    this.context.status = error.status
+    this.context.message = error.message
+    this.context.body = `${this.context.status} ${this.context.message}`
   }
   /**
    * 响应
    */
   private respond(req: ServerRequest) {
+    let body = this.response.body
+    if (typeof body === 'object') body = JSON.stringify(body)
     req.respond({
       status: this.response.status,
       headers: this.response.headers,
-      body: this.response.body,
+      body,
       statusText: this.response.message
     })
   }

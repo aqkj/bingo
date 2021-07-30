@@ -5,25 +5,27 @@
 ## Hello Bingo
 
 ```js
-import { Bingo, Router } from 'https://deno.land/x/bingo@0.1.1/mod.ts'
+import { Bingo, Router } from 'https://deno.land/x/bingo/mod.ts'
 const app = new Bingo()
 const router = new Router()
 router.get('/', (ctx, next) => {
   ctx.body = 'home'
 })
-router.get('/news/:id', (ctx, next) => {
+router.post('/news/:id', async (ctx, next) => {
   ctx.body = 'news' + ctx.params.id
-  next()
+  await next()
 }, (ctx, next) => {
   console.log(ctx.params.id)
 })
 // response
-app.use(ctx => {
-  ctx.body = 'Hello Bingo';
-  next()
+app.use(async ctx => {
+  ctx.body = 'Hello Bingo'
+  await next()
 })
 app.use(router.routes())
-app.listen(3000);
+app.listen(3000, () => {
+  console.log('端口监听3000')
+});
 ```
 
 

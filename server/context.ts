@@ -6,6 +6,7 @@ import { ServerRequest } from 'https://deno.land/std@0.102.0/http/server.ts'
 import { BingoApp } from './app.ts'
 import { BingoRequest } from './request.ts'
 import { BingoResponse } from './response.ts'
+import { HttpError } from '../error.ts'
 export class BingoContext {
   /**
    * app
@@ -43,7 +44,7 @@ export class BingoContext {
    * @param name 头部名称
    */
   get(name: string) {
-    this.request.get(name)
+    return this.request.get(name)
   }
   /**
    * 获取/设置返回结果
@@ -170,5 +171,13 @@ export class BingoContext {
    */
   get headers() {
     return this.request.headers
+  }
+  /**
+   * 抛出错误
+   * @param status 状态ma码
+   * @param msg 信息
+   */
+  throw(status: number, msg: string = '') {
+    throw new HttpError(status, msg)
   }
 }
