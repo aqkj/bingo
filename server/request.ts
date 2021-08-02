@@ -58,7 +58,7 @@ export class BingoRequest {
     return ~~this.get('content-length')
   }
   get type() {
-    return this.get('content-type').slice(0, -1)
+    return this.get('content-type').split(';')[0]
   }
   get querystring() : string {
     return this.URL.search.slice(1)
