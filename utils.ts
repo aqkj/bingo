@@ -18,7 +18,12 @@ export async function callMiddlewares(ctx: BingoContext, middlewares: BingoMiddl
     const nextMiddleware = fn.bind(null, nextCount)
     // 存在则执行
     if (middleware) {
-      await middleware.call(null, ctx, nextMiddleware)
+      try {
+        await middleware.call(null, ctx, nextMiddleware)
+      } catch (error) {
+        // 发送错误事件
+        ctx.app.emit('error', error)
+      }
         // 如果上一个执行完
       // if (nextCount === index + 1) await nextMiddleware()
     }

@@ -68,15 +68,13 @@ export class BingoApp extends Event {
     // 遍历
     for await (const req of this.server) {
       (async () => {
-        try {
-          // 初始化context
-          const ctx = this.initContext(req)
-          // 调用中间件
-          await callMiddlewares(ctx, this.middlewares)
-        } catch (error) {
-          // 发送错误事件
-          this.emit('error', error)
-        }
+        // try {
+        // 初始化context
+        const ctx = this.initContext(req)
+        // 调用中间件
+        await callMiddlewares(ctx, this.middlewares)
+        // } catch (error) {
+        // }
         // 处理结果
         await this.respond(req)
       })()
